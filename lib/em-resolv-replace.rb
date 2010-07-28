@@ -8,6 +8,7 @@ require 'fiber'
 
 # Now override the override with EM-aware functions
 class Resolv
+  MAIN_THREAD = Thread.current
   MAIN_FIBER = Fiber.current
 
   alias :orig_getaddress :getaddress
@@ -37,7 +38,7 @@ class Resolv
   private
 
   def use_event_machine?
-    EM.reactor_running? && Fiber.current != MAIN_FIBER
+    EM.reactor_running? && Thread.current == MAIN_FIBER && Fiber.current != MAIN_FIBER
   end
 
   def em_getaddresses(host)
